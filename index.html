@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Plans &amp; Important Dates</title>
+    <style>
+      body { padding: var(--s3); }
+      .page { max-width: 920px; margin: 0 auto; }
+      .toolbar, .card-head, .actions { display: flex; align-items: center; gap: var(--s); }
+      .toolbar { justify-content: space-between; margin-bottom: var(--s3); }
+      .toolbar .actions { margin-top: 0; }
+      h1, h2, p { margin-top: 0; }
+      h2 { margin: var(--s3) 0 var(--s); font-size: 1rem; color: var(--text-color-muted); }
+      button, input, select, textarea { font: inherit; }
+      button { cursor: pointer; }
+      .primary { background: var(--c-accent); color: var(--text-color-most-intense); border: 0; border-radius: 4px; padding: var(--s) var(--s2); }
+      .plain { background: transparent; color: inherit; border: 1px solid var(--divider-color); border-radius: 4px; padding: var(--s-half) var(--s); }
+      .card { border: 1px solid var(--divider-color); border-left: 4px solid var(--c-accent); border-radius: 6px; padding: var(--s2); margin-bottom: var(--s); background: var(--card-bg); }
+      .card-head { justify-content: space-between; align-items: flex-start; }
+      .title { font-weight: 600; }
+      .countdown { white-space: nowrap; color: var(--c-accent); font-weight: 600; }
+      .meta, .description { color: var(--text-color-muted); margin-top: var(--s-half); }
+      .actions { margin-top: var(--s); flex-wrap: wrap; }
+      .empty { color: var(--text-color-muted); padding: var(--s2); border: 1px dashed var(--divider-color); border-radius: 6px; }
+      dialog { color: var(--text-color); background: var(--bg); border: 1px solid var(--divider-color); border-radius: 8px; width: min(560px, calc(100vw - 32px)); }
+      form { display: grid; gap: var(--s2); }
+      label { display: grid; gap: var(--s-half); }
+      input, select, textarea { box-sizing: border-box; width: 100%; padding: var(--s); color: inherit; background: var(--input-bg); border: 1px solid var(--divider-color); border-radius: 4px; }
+      .row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s2); }
+      .form-actions { display: flex; justify-content: flex-end; gap: var(--s); }
+      .goal { border: 1px solid var(--divider-color); border-left: 4px solid var(--plugin-accent, var(--c-accent)); border-radius: 6px; padding: var(--s2); margin-bottom: var(--s); background: var(--card-bg); }
+      .goal-area { color: var(--plugin-accent, var(--c-accent)); font-size: .85rem; font-weight: 600; text-transform: uppercase; }
+      .bar { height: 8px; background: var(--divider-color); border-radius: 8px; overflow: hidden; margin: var(--s) 0; }
+      .fill { height: 100%; background: var(--plugin-accent, var(--c-accent)); }
+      .chips { display: flex; gap: var(--s-half); flex-wrap: wrap; margin-top: var(--s); }
+      .chip { border: 1px solid var(--divider-color); border-radius: 12px; padding: 2px 8px; font-size: .85rem; }
+      body[data-density="compact"] { --s3: 16px; --s2: 10px; --s: 6px; }
+      .card { border-left-color: var(--plugin-accent, var(--c-accent)); }
+      .primary { background: var(--plugin-accent, var(--c-accent)); }
+      .choice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s2); }
+      .choice-grid button { min-height: 72px; }
+      @media (max-width: 560px) { .row { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <div class="toolbar">
+        <h1 data-i18n="UI.TITLE">Important Dates</h1>
+        <div class="actions"><button id="settings" class="plain" data-i18n="UI.SETTINGS">Settings</button><button id="add" class="primary" data-i18n="UI.ADD">Add item</button></div>
+      </div>
+      <section><h2 data-i18n="UI.GOALS">Long-term goals</h2><div id="goals"></div></section>
+      <section><h2 data-i18n="UI.DATES">Important dates</h2></section>
+      <div id="lists"></div>
+    </main>
+    <dialog id="kind-editor">
+      <h2 data-i18n="UI.CHOOSE_KIND">What would you like to add?</h2>
+      <div class="choice-grid"><button id="choose-date" class="plain" data-i18n="UI.ADD_DATE">Important date</button><button id="choose-goal" class="primary" data-i18n="UI.ADD_GOAL">Long-term goal</button></div>
+      <div class="form-actions"><button id="kind-cancel" type="button" class="plain" data-i18n="UI.CANCEL">Cancel</button></div>
+    </dialog>
+    <dialog id="editor">
+      <form id="form">
+        <input id="id" type="hidden" />
+        <label><span data-i18n="UI.TITLE_FIELD">Title</span><input id="title" required maxlength="160" /></label>
+        <div class="row">
+          <label><span data-i18n="UI.DATE">Date</span><input id="date" type="date" required /></label>
+          <label><span data-i18n="UI.TIME">Time</span><input id="time" type="time" /></label>
+        </div>
+        <label><span data-i18n="UI.TYPE">Type</span><select id="type"></select></label>
+        <label><span data-i18n="UI.DESCRIPTION">Description</span><textarea id="description" rows="3"></textarea></label>
+        <label><span data-i18n="UI.PROJECT">Linked project</span><select id="project"></select></label>
+        <label><span data-i18n="UI.GOAL">Linked goal</span><input id="goal" maxlength="160" /></label>
+        <label><span data-i18n="UI.COURSE">Linked course</span><input id="course" maxlength="160" /></label>
+        <div class="form-actions">
+          <button id="cancel" type="button" class="plain" data-i18n="UI.CANCEL">Cancel</button>
+          <button type="submit" class="primary" data-i18n="UI.SAVE">Save</button>
+        </div>
+      </form>
+    </dialog>
+    <dialog id="goal-editor">
+      <form id="goal-form">
+        <input id="goal-id" type="hidden" />
+        <div class="row">
+          <label><span data-i18n="UI.LIFE_AREA">Life area</span><input id="goal-area" required /></label>
+          <label><span data-i18n="UI.GOAL_TITLE">Goal title</span><input id="goal-title" required maxlength="160" /></label>
+          <label><span data-i18n="UI.TARGET_DATE">Target date</span><input id="goal-date" type="date" /></label>
+          <label><span data-i18n="UI.STATUS">Status</span><select id="goal-status"></select></label>
+          <label><span data-i18n="UI.PROGRESS">Progress</span><input id="goal-progress" type="number" min="0" max="100" value="0" /></label>
+        </div>
+        <label><span data-i18n="UI.DESCRIPTION">Description</span><textarea id="goal-description" rows="3"></textarea></label>
+        <label><span data-i18n="UI.STAGES">Stages</span><textarea id="goal-stages" rows="4"></textarea></label>
+        <label><span data-i18n="UI.PROJECTS">Linked projects</span><select id="goal-projects" multiple size="5"></select></label>
+        <label><span data-i18n="UI.MILESTONES">Linked dates</span><textarea id="goal-milestones" rows="3"></textarea></label>
+        <label><span data-i18n="UI.COURSES">Linked courses</span><textarea id="goal-courses" rows="3"></textarea></label>
+        <div class="form-actions"><button id="goal-cancel" type="button" class="plain" data-i18n="UI.CANCEL">Cancel</button><button type="submit" class="primary" data-i18n="UI.SAVE">Save</button></div>
+      </form>
+    </dialog>
+    <dialog id="settings-editor">
+      <form id="settings-form">
+        <label><span data-i18n="UI.DENSITY">Layout density</span><select id="setting-density"><option value="comfortable" data-i18n="UI.COMFORTABLE">Comfortable</option><option value="compact" data-i18n="UI.COMPACT">Compact</option></select></label>
+        <label><span data-i18n="UI.ACCENT">Accent color</span><select id="setting-accent"><option value="theme" data-i18n="UI.FOLLOW_THEME">Follow SP theme</option><option value="cyan" data-i18n="UI.CYAN">Rhodes cyan</option></select></label>
+        <label><input id="setting-archived" type="checkbox" /> <span data-i18n="UI.SHOW_ARCHIVED">Show archived items</span></label>
+        <div class="form-actions"><button id="settings-cancel" type="button" class="plain" data-i18n="UI.CANCEL">Cancel</button><button type="submit" class="primary" data-i18n="UI.SAVE">Save</button></div>
+      </form>
+    </dialog>
+    <script>
+      const TYPES = ['EXAM', 'REGISTRATION', 'DEADLINE', 'EVENT', 'BIRTHDAY', 'TRAVEL', 'OTHER'];
+      let milestones = [];
+      let goals = [];
+      let settings = { density: 'comfortable', accent: 'theme', showArchived: true };
+      let projects = [];
+      const $ = (id) => document.getElementById(id);
+      const tr = (key, params) => PluginAPI.translate(key, params);
+      const esc = (value) => {
+        const el = document.createElement('div');
+        el.textContent = value || '';
+        return el.innerHTML;
+      };
+      const dateKey = (date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+      const todayKey = () => dateKey(new Date());
+      const localMidnight = (value) => new Date(`${value}T00:00:00`);
+      const dayDifference = (value) => Math.round((localMidnight(value) - localMidnight(todayKey())) / 86400000);
+      const projectTitle = (id) => projects.find((project) => project.id === id)?.title || '';
+      const lines = (value) => value.split('\n').map((entry) => entry.trim()).filter(Boolean);
+
+      async function load() {
+        const raw = await PluginAPI.loadSyncedData('milestones');
+        if (raw) {
+          try {
+            milestones = JSON.parse(raw).items || [];
+          } catch (error) {
+            console.error(error);
+            milestones = [];
+          }
+        }
+        const goalsRaw = await PluginAPI.loadSyncedData('goals');
+        if (goalsRaw) {
+          try { goals = JSON.parse(goalsRaw).goals || []; } catch (error) { console.error(error); goals = []; }
+        }
+        const settingsRaw = await PluginAPI.loadSyncedData('ui-settings');
+        if (settingsRaw) {
+          try { settings = { ...settings, ...JSON.parse(settingsRaw) }; } catch (error) { console.error(error); }
+        }
+        projects = await PluginAPI.getAllProjects();
+      }
+
+      async function save() {
+        await PluginAPI.persistDataSynced(JSON.stringify({ version: 1, items: milestones }), 'milestones');
+      }
+      const saveGoals = () => PluginAPI.persistDataSynced(JSON.stringify({ version: 1, goals }), 'goals');
+      const saveSettings = () => PluginAPI.persistDataSynced(JSON.stringify(settings), 'ui-settings');
+
+      function applySettings() {
+        document.body.dataset.density = settings.density;
+        document.body.style.setProperty('--plugin-accent', settings.accent === 'cyan' ? '#16b9d4' : 'var(--c-accent)');
+      }
+
+      async function applyTranslations() {
+        await Promise.all(Array.from(document.querySelectorAll('[data-i18n]')).map(async (node) => {
+          node.textContent = await tr(node.dataset.i18n);
+        }));
+      }
+
+      async function renderSelects() {
+        const typeOptions = await Promise.all(TYPES.map(async (type) => `<option value="${type}">${esc(await tr(`TYPE.${type}`))}</option>`));
+        $('type').innerHTML = typeOptions.join('');
+        $('project').innerHTML = `<option value="">${esc(await tr('UI.NONE'))}</option>` + projects.map((project) => `<option value="${esc(project.id)}">${esc(project.title)}</option>`).join('');
+        $('goal-status').innerHTML = (await Promise.all(['active', 'paused', 'done'].map(async (status) => `<option value="${status}">${esc(await tr(`UI.${status.toUpperCase()}`))}</option>`))).join('');
+        $('goal-projects').innerHTML = projects.map((project) => `<option value="${esc(project.id)}">${esc(project.title)}</option>`).join('');
+      }
+
+      async function countdown(item) {
+        const days = dayDifference(item.date);
+        if (days === 0) return tr('UI.HAPPENS_TODAY');
+        return days > 0
+          ? tr('UI.DAYS_LEFT', { count: days })
+          : tr('UI.DAYS_AGO', { count: Math.abs(days) });
+      }
+
+      async function card(item) {
+        const when = new Date(`${item.date}T${item.time || '00:00'}`);
+        const date = await PluginAPI.formatDate(when, item.time ? 'datetime' : 'long');
+        const meta = [await tr(`TYPE.${item.type}`), date, projectTitle(item.linkedProjectId), item.linkedGoal, item.linkedCourse]
+          .filter(Boolean).map(esc).join(' · ');
+        return `<article class="card">
+          <div class="card-head"><div><div class="title">${esc(item.title)}</div><div class="meta">${meta}</div></div><div class="countdown">${esc(await countdown(item))}</div></div>
+          ${item.description ? `<div class="description">${esc(item.description)}</div>` : ''}
+          <div class="actions">
+            <button class="plain" data-action="edit" data-id="${esc(item.id)}">${esc(await tr('UI.EDIT'))}</button>
+            <button class="plain" data-action="complete" data-id="${esc(item.id)}">${esc(await tr(item.completed ? 'UI.RESTORE' : 'UI.COMPLETE'))}</button>
+            <button class="plain" data-action="archive" data-id="${esc(item.id)}">${esc(await tr(item.archived ? 'UI.RESTORE' : 'UI.ARCHIVE'))}</button>
+            <button class="plain" data-action="delete" data-id="${esc(item.id)}">${esc(await tr('UI.DELETE'))}</button>
+          </div>
+        </article>`;
+      }
+
+      async function render() {
+        const today = todayKey();
+        const groups = [
+          ['UI.TODAY', (item) => !item.archived && item.date === today],
+          ['UI.UPCOMING', (item) => !item.archived && item.date > today],
+          ['UI.PAST', (item) => !item.archived && item.date < today],
+          ...(settings.showArchived ? [['UI.ARCHIVED', (item) => item.archived]] : []),
+        ];
+        let html = '';
+        for (const [label, predicate] of groups) {
+          const items = milestones.filter(predicate).sort((a, b) => a.date.localeCompare(b.date));
+          html += `<section><h2>${esc(await tr(label))}</h2>${items.length ? (await Promise.all(items.map(card))).join('') : `<div class="empty">${esc(await tr('UI.EMPTY'))}</div>`}</section>`;
+        }
+        $('lists').innerHTML = html;
+      }
+
+      async function renderGoals() {
+        const visibleGoals = goals
+          .filter((goal) => settings.showArchived || !goal.archived)
+          .sort((a, b) => Number(a.archived) - Number(b.archived));
+        if (!visibleGoals.length) {
+          $('goals').innerHTML = `<div class="empty">${esc(await tr('UI.NO_GOALS'))}</div>`;
+          return;
+        }
+        $('goals').innerHTML = (await Promise.all(visibleGoals.map(async (goal) => {
+          const tags = [
+            ...(goal.stages || []).map((stage) => `▸ ${stage}`),
+            ...(goal.projectIds || []).map(projectTitle),
+            ...(goal.milestones || []).map((item) => `◆ ${item}`),
+            ...(goal.courses || []).map((item) => `▣ ${item}`),
+          ].filter(Boolean);
+          const status = ['active', 'paused', 'done'].includes(goal.status) ? goal.status : 'active';
+          return `<article class="goal"><div class="card-head"><div><div class="goal-area">${esc(goal.lifeArea)}</div><div class="title">${esc(goal.title)}</div></div><div class="countdown">${Number(goal.progress) || 0}%</div></div>${goal.description ? `<div class="description">${esc(goal.description)}</div>` : ''}<div class="bar"><div class="fill" style="width:${Math.max(0, Math.min(100, Number(goal.progress) || 0))}%"></div></div><div class="meta">${esc(await tr(`UI.${status.toUpperCase()}`))}${goal.targetDate ? ` · ${esc(goal.targetDate)}` : ''}</div><div class="chips">${tags.map((tag) => `<span class="chip">${esc(tag)}</span>`).join('')}</div><div class="actions"><button class="plain" data-goal-action="edit" data-id="${esc(goal.id)}">${esc(await tr('UI.EDIT'))}</button><button class="plain" data-goal-action="archive" data-id="${esc(goal.id)}">${esc(await tr(goal.archived ? 'UI.RESTORE' : 'UI.ARCHIVE'))}</button><button class="plain" data-goal-action="delete" data-id="${esc(goal.id)}">${esc(await tr('UI.DELETE'))}</button></div></article>`;
+        }))).join('');
+      }
+
+      function openEditor(item) {
+        $('id').value = item?.id || '';
+        $('title').value = item?.title || '';
+        $('date').value = item?.date || todayKey();
+        $('time').value = item?.time || '';
+        $('type').value = item?.type || 'EXAM';
+        $('description').value = item?.description || '';
+        $('project').value = item?.linkedProjectId || '';
+        $('goal').value = item?.linkedGoal || '';
+        $('course').value = item?.linkedCourse || '';
+        $('editor').showModal();
+      }
+
+      function openGoalEditor(goal) {
+        $('goal-id').value = goal?.id || '';
+        $('goal-area').value = goal?.lifeArea || '';
+        $('goal-title').value = goal?.title || '';
+        $('goal-date').value = goal?.targetDate || '';
+        $('goal-status').value = goal?.status || 'active';
+        $('goal-progress').value = goal?.progress || 0;
+        $('goal-description').value = goal?.description || '';
+        $('goal-stages').value = goal?.stages?.join('\n') || '';
+        $('goal-milestones').value = goal?.milestones?.join('\n') || '';
+        $('goal-courses').value = goal?.courses?.join('\n') || '';
+        Array.from($('goal-projects').options).forEach((option) => { option.selected = goal?.projectIds?.includes(option.value) || false; });
+        $('goal-editor').showModal();
+      }
+
+      $('add').addEventListener('click', () => $('kind-editor').showModal());
+      $('choose-date').addEventListener('click', () => { $('kind-editor').close(); openEditor(); });
+      $('choose-goal').addEventListener('click', () => { $('kind-editor').close(); openGoalEditor(); });
+      $('kind-cancel').addEventListener('click', () => $('kind-editor').close());
+      $('cancel').addEventListener('click', () => $('editor').close());
+      $('goal-cancel').addEventListener('click', () => $('goal-editor').close());
+      $('settings').addEventListener('click', () => {
+        $('setting-density').value = settings.density;
+        $('setting-accent').value = settings.accent;
+        $('setting-archived').checked = settings.showArchived;
+        $('settings-editor').showModal();
+      });
+      $('settings-cancel').addEventListener('click', () => $('settings-editor').close());
+      $('form').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const old = milestones.find((item) => item.id === $('id').value);
+        const item = {
+          id: old?.id || crypto.randomUUID(),
+          title: $('title').value.trim(),
+          date: $('date').value,
+          time: $('time').value || null,
+          type: $('type').value,
+          description: $('description').value.trim(),
+          linkedProjectId: $('project').value || null,
+          linkedGoal: $('goal').value.trim() || null,
+          linkedCourse: $('course').value.trim() || null,
+          completed: old?.completed || false,
+          archived: old?.archived || false,
+          createdAt: old?.createdAt || Date.now(),
+          updatedAt: Date.now(),
+        };
+        milestones = old ? milestones.map((entry) => entry.id === item.id ? item : entry) : [...milestones, item];
+        await save();
+        $('editor').close();
+        await render();
+        PluginAPI.showSnack({ msg: await tr('UI.SAVED'), type: 'SUCCESS' });
+      });
+
+      $('goal-form').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const old = goals.find((goal) => goal.id === $('goal-id').value);
+        const goal = {
+          id: old?.id || crypto.randomUUID(),
+          lifeArea: $('goal-area').value.trim(),
+          title: $('goal-title').value.trim(),
+          description: $('goal-description').value.trim(),
+          targetDate: $('goal-date').value || null,
+          progress: Math.max(0, Math.min(100, Number($('goal-progress').value) || 0)),
+          status: $('goal-status').value,
+          stages: lines($('goal-stages').value),
+          projectIds: Array.from($('goal-projects').selectedOptions).map((option) => option.value),
+          milestones: lines($('goal-milestones').value),
+          courses: lines($('goal-courses').value),
+          archived: old?.archived || false,
+          updatedAt: Date.now(),
+        };
+        goals = old ? goals.map((entry) => entry.id === goal.id ? goal : entry) : [...goals, goal];
+        await saveGoals();
+        $('goal-editor').close();
+        await renderGoals();
+        PluginAPI.showSnack({ msg: await tr('UI.SAVED'), type: 'SUCCESS' });
+      });
+
+      $('settings-form').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        settings = { density: $('setting-density').value, accent: $('setting-accent').value, showArchived: $('setting-archived').checked };
+        await saveSettings();
+        applySettings();
+        $('settings-editor').close();
+        await renderGoals();
+        await render();
+        PluginAPI.showSnack({ msg: await tr('UI.SETTINGS_SAVED'), type: 'SUCCESS' });
+      });
+
+      $('lists').addEventListener('click', async (event) => {
+        const button = event.target.closest('[data-action]');
+        if (!button) return;
+        const item = milestones.find((entry) => entry.id === button.dataset.id);
+        if (!item) return;
+        if (button.dataset.action === 'edit') return openEditor(item);
+        if (button.dataset.action === 'delete') {
+          if (!confirm(await tr('UI.CONFIRM_DELETE'))) return;
+          milestones = milestones.filter((entry) => entry.id !== item.id);
+          PluginAPI.showSnack({ msg: await tr('UI.DELETED'), type: 'SUCCESS' });
+        } else if (button.dataset.action === 'complete') {
+          item.completed = !item.completed;
+        } else if (button.dataset.action === 'archive') {
+          item.archived = !item.archived;
+        }
+        item.updatedAt = Date.now();
+        await save();
+        await render();
+      });
+
+      $('goals').addEventListener('click', async (event) => {
+        const button = event.target.closest('[data-goal-action]');
+        if (!button) return;
+        const goal = goals.find((entry) => entry.id === button.dataset.id);
+        if (!goal) return;
+        if (button.dataset.goalAction === 'edit') return openGoalEditor(goal);
+        if (button.dataset.goalAction === 'archive') goal.archived = !goal.archived;
+        if (button.dataset.goalAction === 'delete') {
+          if (!confirm(await tr('UI.CONFIRM_DELETE'))) return;
+          goals = goals.filter((entry) => entry.id !== goal.id);
+        }
+        await saveGoals();
+        await renderGoals();
+      });
+
+      async function init() {
+        await load();
+        applySettings();
+        await applyTranslations();
+        await renderSelects();
+        await renderGoals();
+        await render();
+      }
+      PluginAPI.registerHook(PluginAPI.Hooks.LANGUAGE_CHANGE, async () => {
+        await applyTranslations();
+        await renderSelects();
+        await renderGoals();
+        await render();
+      });
+      PluginAPI.registerHook(PluginAPI.Hooks.PERSISTED_DATA_CHANGED, init);
+      init();
+    </script>
+  </body>
+</html>

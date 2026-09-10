@@ -1,0 +1,25 @@
+{
+  "name": "Plans & Important Dates",
+  "id": "important-dates",
+  "manifestVersion": 1,
+  "version": "2.0.0",
+  "minSupVersion": "18.21.2",
+  "description": "Keeps long-term goals and important dates together in one planning view.",
+  "author": "SCSldr",
+  "hooks": ["languageChange", "persistedDataChanged"],
+  "permissions": [
+    "getAllProjects",
+    "persistDataSynced",
+    "loadSyncedData",
+    "showIndexHtmlAsView",
+    "showSnack"
+  ],
+  "i18n": {
+    "languages": ["en", "zh"]
+  },
+  "iFrame": true,
+  "sidePanel": false,
+  "type": "standard",
+  "assets": [],
+  "icon": "icon.svg"
+}

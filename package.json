@@ -1,0 +1,8 @@
+{
+  "name": "@scsldr/sp-plans-important-dates",
+  "version": "2.0.0",
+  "private": false,
+  "scripts": {
+    "build": "echo 'No build needed for simple plugin'"
+  }
+}
