@@ -1,25 +1,51 @@
 # Plans & Important Dates for Super Productivity
 
-把长期规划和重要日期放在同一个 Super Productivity 页面中。添加时可选择“长期目标”或“重要日期”，支持中英文、项目关联、进度、归档和界面设置。
+A full-page [Super Productivity](https://github.com/johannesjo/super-productivity) plugin that keeps long-term goals and important dates in one planning view.
 
-Combines long-term goals and important dates in one full-page Super Productivity plugin. It supports Chinese and English, project linking, progress, archiving, and display settings.
+中文说明见下方。
 
-## Install / 安装
+## Features
 
-1. Download the release ZIP, or zip the files in this directory with `manifest.json` at the archive root.
-2. In Super Productivity, open Settings → Plugins and import the ZIP.
-3. Restart Super Productivity.
+- Create long-term goals and important dates from one Add menu
+- Track goal area, status, progress, stages, target date, and linked projects
+- Group dates into Today, Upcoming, Past, and Archived
+- Link dates to a Super Productivity project, goal, or course
+- Archive, restore, complete, edit, and delete planning items
+- English and Chinese translations that follow the SP language
+- Synced plugin storage for planning data and display settings
 
-Requires Super Productivity 18.21.2 or later. The plugin appears in the app sidebar and opens as a full page.
+## Installation
 
-## Data and permissions / 数据与权限
+1. Download `sp-plans-important-dates.zip` from GitHub Releases.
+2. Open Super Productivity → Settings → Plugins.
+3. Import the ZIP file and restart Super Productivity if requested.
+4. Open **Plans & Important Dates** from the plugin entry.
 
-Data is stored through `persistDataSynced`, so it follows Super Productivity's normal sync data. The plugin reads project names for linking and does not delete Super Productivity tasks or projects.
+Requires Super Productivity **18.21.2 or later**.
 
-## Text customization / 修改文本
+## Data and permissions
 
-Edit `i18n/zh.json` and `i18n/en.json`. Keep the keys unchanged and edit only their values.
+The plugin reads project names for optional linking, saves only its own plugin data, opens a full-page view, and shows confirmation messages. It does not modify or delete Super Productivity tasks or projects.
+
+## 中文说明
+
+该插件把长期目标和重要日期放在同一个页面中，可以记录目标进度、阶段、关联项目，以及考试、报名、截止日期等重要节点。界面会跟随 Super Productivity 的中英文语言设置。
+
+## Development and packaging
+
+This is a dependency-free iframe plugin. Package the following files with `manifest.json` at the ZIP root:
+
+```text
+manifest.json
+index.html
+icon.svg
+i18n/
+```
+
+```powershell
+Compress-Archive -Path manifest.json,index.html,icon.svg,i18n -DestinationPath sp-plans-important-dates.zip
+```
 
 ## License
 
-MIT
+[MIT](LICENSE)
